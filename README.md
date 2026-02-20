@@ -3,7 +3,7 @@ Ironhack AI Engineering Bootcamp Project
 
 By Benjamin Hunt and Edwin Sentiego 
 
-![Amazon AI Reviews Aggregator](amazon-ai-reviews-aggregator.png)
+![Amazon AI Reviews Aggregator](Amazon%20AI%20Reviews%20Aggregator.%20.png)
 
 
 **Main Ironhack Project Website:** https://amazon-user-review-aggregator-project.lovable.app/
