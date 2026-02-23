@@ -1,0 +1,11 @@
+
+# local secrets / IDE
+.env
+.idea/
+
+# large data artifacts
+data/*.zip
+data/*.gz
+
+# windows/git-bash oddity
+nul
