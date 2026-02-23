@@ -248,3 +248,7 @@ pip install -r requirements.txt
 Optional note
 
 Final transformer metrics are saved in ./artifacts_teacher/metrics.json after your best run.
+
+
+## Notes
+PR created for coursework submission.
