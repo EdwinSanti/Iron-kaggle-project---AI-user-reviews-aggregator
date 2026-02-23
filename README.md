@@ -1,10 +1,9 @@
 # AI User Review Aggregator  
 Ironhack AI Engineering Bootcamp Project
 
-By Benjamin Hunt and Edwin Sentiego 
+By Benjamin Hunt and Edwin Santiago
 
 ![Amazon AI Reviews Aggregator](Amazon%20AI%20Reviews%20Aggregator.%20.png)
-
 
 **Main Ironhack Project Website:** https://amazon-user-review-aggregator-project.lovable.app/
 
@@ -20,6 +19,15 @@ All components were implemented and evaluated following the project guidelines.
 
 ---
 
+## Repo Overview (What’s in this repo)
+
+- **Notebooks (model development):** sentiment models (baseline → transformer), clustering, and LLM summarization.
+- **Exports for UI/website:** per-review scored predictions (labels, confidence, class probabilities) and optional JSON-ready tables.
+- **Artifacts (deployment-ready):** saved transformer model + tokenizer + label map + evaluation metrics.
+- **Demo interfaces:** Streamlit/Lovable-style outputs for (1) category-based summaries and (2) AI-vs-human rating analysis.
+
+---
+
 ## Project Objectives
 
 1. Implement a supervised sentiment classification model.
@@ -31,6 +39,22 @@ All components were implemented and evaluated following the project guidelines.
 ---
 
 ## 1. Sentiment Classification (Supervised Learning)
+
+### Model 1 — Early Baselines (Model 1A + Model 1B)
+
+**Where:** `code/model1a.ipynb` and `code/model1b.ipynb`
+
+**Purpose (why Model 1 exists):**
+- Establish a **quick baseline** and workflow for text cleaning, label mapping, and evaluation.
+- Provide a reference point before moving to stronger classical ML and transformer approaches.
+
+**What Model 1 covers (high level):**
+- Data loading + preprocessing for review text
+- Converting star ratings into the 3-class label set: **negative / neutral / positive**
+- Baseline experiments + core metrics + confusion matrix checks
+- Producing an initial “scored” dataframe format (pred label + confidence + per-class probabilities) reused later
+
+---
 
 ### Model 2 — LinearSVC (Classical ML Baseline)
 
@@ -55,12 +79,12 @@ The Linear SVM was selected based on balanced precision and recall performance o
 
 ---
 
-### Model 5 — Final Sentiment Transformer Model (Colab Notebook)
+### Model 3 — Final Sentiment Transformer Model (Colab Notebook)
 
-**Model 5 is the final sentiment model** used for the project’s modern transformer pipeline.  
-It is implemented in **`Model5.ipynb`** and is intended to be run in **Google Colab (GPU runtime recommended)**.
+**Model 3 is the final sentiment model** used for the project’s modern transformer pipeline.  
+It is implemented in **`code/Model3.ipynb`** and is intended to be run in **Google Colab (GPU runtime recommended)**.
 
-**What Model 5 does (end-to-end):**
+**What Model 3 does (end-to-end):**
 - Clean preprocessing of review text
 - **Leakage-safe 80/20 split**: stratified by sentiment label and **group-aware by product (`item_id`)** to prevent product leakage across train/test
 - Transformer fine-tuning (supervised learning)
@@ -75,7 +99,7 @@ It is implemented in **`Model5.ipynb`** and is intended to be run in **Google Co
   - 3 → **neutral**
   - 4–5 → **positive**
 
-**Transformer backbone (teacher fine-tune):**
+**Transformer backbone (fine-tuned classifier):**
 - `microsoft/deberta-v3-base` (3-class sequence classification)
 - Tokenization uses **dynamic padding** via `DataCollatorWithPadding`
 - `MAX_LEN = 256`
@@ -95,7 +119,7 @@ It is implemented in **`Model5.ipynb`** and is intended to be run in **Google Co
   - early stopping: patience `1`
   - selects best model by `f1_macro`
 
-**Artifacts + outputs saved by Model 5:**
+**Artifacts + outputs saved by Model 3:**
 - Saved model + tokenizer + label map + metrics to:
   - `./artifacts_teacher/`
     - `label_map.json`
@@ -103,13 +127,13 @@ It is implemented in **`Model5.ipynb`** and is intended to be run in **Google Co
 - Saves per-review predictions (including probabilities/confidence) to:
   - `/content/scored_test_predictions.csv` (Colab)
 
-**Extra analysis included in Model 5 (ratings comparison):**
+**Extra analysis included in Model 3 (ratings comparison):**
 - Includes a utility pipeline to compare **AI-derived “star ratings” vs human ratings** using:
   - `cardiffnlp/twitter-roberta-base-sentiment-latest`
 - This supports the “AI vs Human Rating” dashboard and dataset-level comparison.
 
-**How to run Model 5 (Colab):**
-1. Open `Model5.ipynb` in Google Colab
+**How to run Model 3 (Colab):**
+1. Open `code/Model3.ipynb` in Google Colab
 2. Upload `user_reviews.csv` into the Colab runtime (`/content`)
 3. Run the notebook from top to bottom (it pins versions, then asks for a runtime restart)
 4. After training, download:
@@ -123,8 +147,8 @@ It is implemented in **`Model5.ipynb`** and is intended to be run in **Google Co
 To reduce category sparsity and improve interpretability:
 
 1. Reviews were aggregated per product.
-2. Product-level embeddings were generated using:
-   sentence-transformers/all-MiniLM-L6-v2
+2. Product-level embeddings were generated using:  
+   `sentence-transformers/all-MiniLM-L6-v2`
 3. KMeans clustering was applied (k = 4).
 4. Clustering quality was evaluated using:
    - Silhouette Score: 0.158  
@@ -196,44 +220,31 @@ Both interfaces operate on the same classification and clustering pipeline.
 
 ## Project Structure
 
-```
-review-aggregator/
-│
-├── data/
-├── notebooks/
-│ ├── sentiment_model.ipynb
-│ ├── clustering_model.ipynb
-│ ├── llm_generator.ipynb
-│ ├── Model5.ipynb
-│
-├── app/
-│ ├── review_generator_app.py
-│ ├── ai_vs_human_dashboard.py
-│
-├── models/
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Environment Setup
-
-```bash
+```text
+ai-user-reviews-agg-project/
+├── code/
+│   ├── model1a.ipynb
+│   ├── model1b.ipynb
+│   ├── model2.ipynb
+│   ├── Model3.ipynb
+│   └── (other notebooks / demo code)
+├── data/                          # large files ignored in .gitignore
+├── README.md
+└── (project assets: images / slides / etc.)
+Environment Setup
 python -m venv .venv
 
-Windows:
+Windows
 
 .venv\Scripts\activate
 
-macOS/Linux:
+macOS/Linux
 
 source .venv/bin/activate
 
 Then install dependencies:
 
 pip install -r requirements.txt
+Optional note
 
----
-
-If you want, paste the **final metrics line(s)** from `./artifacts_teacher/metrics.json` after your best run, and I’ll add a clean **“Model 5 Performance”** subsection (without changing any wording elsewhere).
+Final transformer metrics are saved in ./artifacts_teacher/metrics.json after your best run.
